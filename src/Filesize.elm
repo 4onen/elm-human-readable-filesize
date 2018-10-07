@@ -154,10 +154,27 @@ removeTrailingZeroesRegex =
 
 
 {-| Formats the given file size with the default settings.
+
+Convenience function for 
+
+    let
+        (size,unit) = formatWithSplit settings num
+    in
+        size++" "++unit
+
 -}
 format : Int -> String
-format =
-    formatWith defaultSettings
+format num =
+    let
+        (size,unit) = formatWithSplit defaultSettings num
+    in
+        size++" "++unit
+
+{-| Formats the given file size with the default settings, returning the number and units separately, in a tuple.
+-}
+formatSplit : Int -> (String,String)
+formatSplit =
+    formatWithSplit defaultSettings
 
 
 {-| Formats the given file size with the binary/base2/IEC unit.
@@ -166,13 +183,27 @@ formatBase2 : Int -> String
 formatBase2 =
     formatWith { defaultSettings | units = Base2 }
 
+{-| Formats the given file size with the binary/base2/IEC unit, returning the number and units separately, in a tuple.
+-}
+formatBase2Split : Int -> (String,String)
+formatBase2Split =
+    formatWithSplit { defaultSettings | units = Base2 }
 
 {-| Formats the given file size with the given settings.
 -}
 formatWith : Settings -> Int -> String
 formatWith settings num =
+    let
+        (size,unit) = formatWithSplit settings num
+    in
+        size++" "++unit
+
+{-| Formats the given file size with the given settings, returning the number and units separately, in a tuple.
+-}
+formatWithSplit : Settings -> Int -> (String,String)
+formatWithSplit settings num =
     if num == 0 then
-        "0 B"
+        ("0","B")
     else
         let
             ( num2, negativePrefix ) =
@@ -196,7 +227,7 @@ formatWith settings num =
                     / toFloat unitDefinition.minimumSize
                     |> roundToDecimalPlaces settings
         in
-            negativePrefix ++ formattedNumber ++ " " ++ unitDefinition.abbreviation
+            (negativePrefix ++ formattedNumber, unitDefinition.abbreviation)
 
 
 roundToDecimalPlaces : Settings -> Float -> String
